@@ -1,0 +1,54 @@
+name: build KCC for Linux
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+    
+    # Don't trigger if it's just a documentation update
+    paths-ignore:
+      - '**.md'
+      - '**.MD'
+      - '**.yml'
+      - '**.sh'
+      - 'docs/**'
+      - 'Dockerfile'
+      - 'LICENSE'
+      - '.gitattributes'
+      - '.gitignore'
+      - '.dockerignore'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python
+      uses: actions/setup-python@v3
+      with:
+        python-version: 3.8
+        cache: 'pip'
+    - name: Install python dependencies
+      run: |
+        python -m pip install --upgrade pip setuptools wheel pyinstaller
+        pip install -r requirements.txt
+    - name: build binary
+      run: |
+        python kcc.py --version
+        pyinstaller --onefile --hidden-import=queue "kcc.py" -n "kcc_linux"
+        chmod +x dist/kcc_linux
+        dist/kcc_linux --version
+    - name: upload build
+      uses: actions/upload-artifact@v3
+      with:
+        name: linux-build
+        path: dist/kcc_linux
+    - name: Release
+      uses: softprops/action-gh-release@v1
+      with:
+        prerelease: true
+        generate_release_notes: true
+        files: |
+          CHANGELOG.md
+          LICENSE.txt
+          dist/kcc_linux
