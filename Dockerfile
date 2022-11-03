@@ -144,6 +144,16 @@ COPY --from=compile-armv7 /opt/venv /opt/venv
 FROM build-${TARGETARCH}${TARGETVARIANT}
 LABEL com.kcc.name="Kindle Comic Converter"
 LABEL com.kcc.author="Ciro Mattia Gonano and Paweł Jastrzębski"
+LABEL org.opencontainers.image.description='Kindle Comic Converter'
+LABEL org.opencontainers.image.documentation='https://github.com/darodi/kcc'
+LABEL org.opencontainers.image.source='https://github.com/darodi/kcc'
+LABEL org.opencontainers.image.authors='darodi'
+LABEL org.opencontainers.image.url='https://github.com/darodi/kcc'
+LABEL org.opencontainers.image.documentation='https://github.com/darodi/kcc'
+LABEL org.opencontainers.image.vendor='darodi'
+LABEL org.opencontainers.image.licenses='ISC'
+LABEL org.opencontainers.image.title="Kindle Comic Converter"
+
 
 ENV PATH="/opt/venv/bin:$PATH"
 WORKDIR /opt/kcc

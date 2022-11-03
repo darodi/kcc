@@ -17,7 +17,7 @@ import setuptools
 import distutils.cmd
 from kindlecomicconverter import __version__
 
-NAME = 'KindleComicConverter'
+NAME = 'KindleComicConverterDarodi'
 MAIN = 'kcc.py'
 VERSION = __version__
 

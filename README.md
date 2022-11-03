@@ -44,6 +44,11 @@ You can find the latest released binary at the following links:
 pip install --user KindleComicConverter
 ```
 
+beta version 
+```
+pip install --index-url https://test.pypi.org/simple/  KindleComicConverterDarodi
+```
+
 ## DEPENDENCIES
 Following software is required to run Linux version of **KCC** and/or bare sources:
 - Python 3.3+
@@ -181,12 +186,11 @@ The app relies and includes the following scripts:
 
 _Originally posted by @hhtien1408 in https://github.com/ciromattia/kcc/issues/438#issuecomment-1281159452_
 
-        I wrote step-by-step instructions to install the lastest beta KCC-5.5.3-beta-darodi.6 based on @hiagpofranco idea
-
+```
 $ git clone -branch beta_release https://github.com/darodi/kcc.git
+```
 
-
-Then I installed the necessary packages. You can do it by running the following command. The requirements.txt file is inside this repository, you will see it when you clone the repo.
+Then install the necessary packages. You can do it by running the following command. The requirements.txt file is inside this repository, you will see it when you clone the repo.
 
 ```
 $ pip3 install -r 'requirements.txt' 
@@ -202,7 +206,6 @@ If the packages are in the wrong version, you can try to upgrade them by running
 
 ```
 $ pip3 install --upgrade name_of_the_package
-
 ```
 Now, it should be all done. You can go to the folder of this repo and run
 
