@@ -49,6 +49,27 @@ beta version
 pip install --index-url https://test.pypi.org/simple/  KindleComicConverterDarodi
 ```
 
+## DOCKER
+
+
+
+install kindlegen in your working directory and get last docker image
+```
+wget -qO- https://archive.org/download/kindlegen_linux_2_6_i386_v2_9/kindlegen_linux_2.6_i386_v2_9.tar.gz | tar xvz kindlegen
+docker pull ghcr.io/darodi/kcc:latest
+```
+
+execute kcc-c2e
+```
+docker run --rm -v "$(pwd):/app" ghcr.io/darodi/kcc:latest 
+```
+
+execute kcc-c2p
+```
+docker run --entrypoint /opt/kcc/kcc-c2p.py --rm -v "$(pwd):/app" ghcr.io/darodi/kcc:latest 
+```
+
+
 ## DEPENDENCIES
 Following software is required to run Linux version of **KCC** and/or bare sources:
 - Python 3.3+
@@ -94,8 +115,8 @@ Options:
   MAIN:
     -p PROFILE, --profile=PROFILE
                         Device profile (Available options: K1, K2, K34, K578,
-                        KDX, KPW, KPW5, KV, KO, KoMT, KoG, KoGHD, KoA, KoAHD, KoAH2O,
-                        KoAO, KoC, KoL, KoF) [Default=KV]
+                        KDX, KPW, KPW5, KV, KO, KoMT, KoG, KoGHD, KoA, KoAHD,
+                        KoAH2O, KoAO, KoC, KoL, KoF) [Default=KV]
     -m, --manga-style   Manga style (right-to-left reading and splitting)
     -q, --hq            Try to increase the quality of magnification
     -2, --two-panel     Display two not four panels in Panel View mode
@@ -115,6 +136,8 @@ Options:
                         separate volume [Default=0]
 
   PROCESSING:
+    -n, --noprocessing  Do not modify image and ignore any profil or
+                        processing option
     -u, --upscale       Resize images smaller than device's resolution
     -s, --stretch       Stretch images to device's resolution
     -r SPLITTER, --splitter=SPLITTER
@@ -132,6 +155,8 @@ Options:
     --whiteborders      Disable autodetection and force white borders
     --forcecolor        Don't convert images to grayscale
     --forcepng          Create PNG files instead JPEG
+    --mozjpeg           Create JPEG files using mozJpeg
+    --maximizestrips    Turn 1x4 strips to 2x2 strips
 
   CUSTOM PROFILE:
     --customwidth=CUSTOMWIDTH
@@ -213,8 +238,10 @@ Now, it should be all done. You can go to the folder of this repo and run
 $ wget https://archive.org/download/kindlegen_linux_2_6_i386_v2_9/kindlegen_linux_2.6_i386_v2_9.tar.gz
 ```
 ```
-$ unzip kindlegen_linux_2.6_i386_v2_9.tar.gz
+$ tar xvzf kindlegen_linux_2.6_i386_v2_9.tar.gz kindlegen
 ```
+Download and copy kindlegen into '/usr/local/bin' and grant execute permissions for MOBI conversion.
+
 ```
 $ sudo cp -R '/home/user/Desktop/kindlegen' '/usr/local/bin'
 ``` 
@@ -222,7 +249,6 @@ $ sudo cp -R '/home/user/Desktop/kindlegen' '/usr/local/bin'
 $ sudo chmod +rwx '/usr/local/bin/kindlegen' 
 ```
 
-Download and copy kindlegen into '/usr/local/bin' and grant execute permissions for MOBI conversion.
 
 Run python file for KCC GUI
 ```

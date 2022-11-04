@@ -158,7 +158,7 @@ LABEL org.opencontainers.image.title="Kindle Comic Converter"
 ENV PATH="/opt/venv/bin:$PATH"
 WORKDIR /opt/kcc
 COPY . /opt/kcc
-RUN ln -s /app/kindlegen /opt/kcc/kindlegen && \
+RUN ln -s /app/kindlegen /bin/kindlegen && \
     cat /opt/kcc/kindlecomicconverter/__init__.py | grep version | awk '{print $3}' | sed "s/'//g" > /IMAGE_VERSION
 
 ENTRYPOINT ["/opt/kcc/kcc-c2e.py"]
