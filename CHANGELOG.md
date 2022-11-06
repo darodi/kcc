@@ -1,5 +1,8 @@
 # CHANGELOG
 
+#### 5.5.3b9:
+* docker image for command line [darodi/kcc#5](https://github.com/darodi/kcc/issues/5), thanks [@darodi](https://github.com/darodi)
+
 #### 5.5.3-beta-darodi.8:
 * Fix type error in autocontrastImage [ciromattia/kcc#432](https://github.com/ciromattia/kcc/issues/432), thanks [@darodi](https://github.com/darodi)
 
