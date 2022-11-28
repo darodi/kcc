@@ -1,5 +1,8 @@
 # CHANGELOG
 
+#### 5.5.3b12:
+*  fix #1 Using 'Disable processing' option using my processed image get an error [darodi/kcc#1](https://github.com/darodi/kcc/issues/1), thanks [@darodi](https://github.com/darodi)
+
 #### 5.5.3b11:
 *  KFX Output in GUI [darodi/kcc#9](https://github.com/darodi/kcc/issues/9), thanks [@darodi](https://github.com/darodi)
 
