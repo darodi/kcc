@@ -1,5 +1,8 @@
 # CHANGELOG
 
+#### 5.5.3b13:
+*   Keep epub file when selecting another type of output file [darodi/kcc#12](https://github.com/darodi/kcc/issues/12), thanks [@darodi](https://github.com/darodi)
+
 #### 5.5.3b12:
 *  fix #1 Using 'Disable processing' option using my processed image get an error [darodi/kcc#1](https://github.com/darodi/kcc/issues/1), thanks [@darodi](https://github.com/darodi)
 
