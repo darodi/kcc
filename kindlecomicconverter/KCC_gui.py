@@ -942,7 +942,7 @@ class KCCGUI(KCC_ui.Ui_mainWindow):
             "Kindle": {'PVOptions': True, 'ForceExpert': False, 'DefaultFormat': 0, 'DefaultUpscale': False, 'Label': 'K578'},
             "Kindle DX/DXG": {'PVOptions': False, 'ForceExpert': False, 'DefaultFormat': 2, 'DefaultUpscale': False, 'Label': 'KDX'},
             "Kobo Nia": {'PVOptions': False, 'ForceExpert': False, 'DefaultFormat': 1, 'DefaultUpscale': True, 'Label': 'KoN'},            
-            "Kobo Clara 2E": {'PVOptions': False, 'ForceExpert': False, 'DefaultFormat': 1, 'DefaultUpscale': True, 'Label': 'KoC'},            "Kobo Clara 2E": {'PVOptions': False, 'ForceExpert': False, 'DefaultFormat': 1, 'DefaultUpscale': True, 'Label': 'KoC'},
+            "Kobo Clara 2E": {'PVOptions': False, 'ForceExpert': False, 'DefaultFormat': 1, 'DefaultUpscale': True, 'Label': 'KoC'},
             "Kobo Libra 2": {'PVOptions': False, 'ForceExpert': False, 'DefaultFormat': 1, 'DefaultUpscale': True, 'Label': 'KoL'},
             "Kobo Forma": {'PVOptions': False, 'ForceExpert': False, 'DefaultFormat': 1, 'DefaultUpscale': True, 'Label': 'KoF'},
             "Kobo Sage": {'PVOptions': False, 'ForceExpert': False, 'DefaultFormat': 1, 'DefaultUpscale': True, 'Label': 'KoS'},            
