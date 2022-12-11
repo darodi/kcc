@@ -1,5 +1,8 @@
 # CHANGELOG
 
+#### 5.5.3b15:
+*    Adding a switch on GUI interface in order to control cropping options  [darodi/kcc#18](https://github.com/darodi/kcc/issues/18), thanks [@darodi](https://github.com/darodi)
+
 #### 5.5.3b14:
 *    profiles: add Kindle11 and Kindle Scribe  [darodi/kcc#16](https://github.com/darodi/kcc/issues/16), thanks [@darodi](https://github.com/darodi)
 *    Update with new Kobo models   [darodi/kcc#15](https://github.com/darodi/kcc/issues/15), thanks [@lennie420](https://github.com/lennie420)
