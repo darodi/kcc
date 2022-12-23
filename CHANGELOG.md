@@ -1,5 +1,8 @@
 # CHANGELOG
 
+#### 5.5.3b16:
+*    Feature Request: allow split for epub and set target (email, web upload)  [darodi/kcc#21](https://github.com/darodi/kcc/issues/21), thanks [@darodi](https://github.com/darodi)
+
 #### 5.5.3b15:
 *    Adding a switch on GUI interface in order to control cropping options  [darodi/kcc#18](https://github.com/darodi/kcc/issues/18), thanks [@darodi](https://github.com/darodi)
 
