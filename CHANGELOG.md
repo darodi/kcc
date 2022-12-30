@@ -1,5 +1,8 @@
 # CHANGELOG
 
+#### 5.5.3b18:
+*    Spread splitter not keeping aspect ratio    [darodi/kcc#27](https://github.com/darodi/kcc/issues/27), thanks [@darodi](https://github.com/darodi)
+
 #### 5.5.3b17:
 *    activate batchsplit only for EPUB-200  [darodi/kcc#24](https://github.com/darodi/kcc/issues/24), thanks [@darodi](https://github.com/darodi)
 
