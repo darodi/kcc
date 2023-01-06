@@ -1,5 +1,8 @@
 # CHANGELOG
 
+#### 5.5.3b19:
+*    Fix Docker 7z missing  [darodi/kcc#31](https://github.com/darodi/kcc/issues/31), thanks [@darodi](https://github.com/darodi)
+
 #### 5.5.3b18:
 *    Spread splitter not keeping aspect ratio    [darodi/kcc#27](https://github.com/darodi/kcc/issues/27), thanks [@darodi](https://github.com/darodi)
 
