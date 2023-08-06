@@ -631,7 +631,7 @@ def getWorkFolder(afile):
                 path = cbx.extract(workdir)
             except OSError as e:
                 rmtree(workdir, True)
-                raise UserWarning(e.strerror)
+                raise UserWarning(e)
     else:
         raise UserWarning("Failed to open source file/directory.")
     sanitizePermissions(path)
@@ -695,7 +695,9 @@ def getComicInfo(path, originalpath):
             os.remove(xmlPath)
             return
         options.authors = []
-        if defaultTitle:
+        if xml.data['Title']:
+            options.title = hescape(xml.data['Title'])
+        elif defaultTitle:
             if xml.data['Series']:
                 options.title = hescape(xml.data['Series'])
             if xml.data['Volume']:

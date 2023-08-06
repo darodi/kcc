@@ -113,12 +113,6 @@ class Icons:
         self.CBZFormat.addPixmap(QtGui.QPixmap(":/Formats/icons/CBZ.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.EPUBFormat = QtGui.QIcon()
         self.EPUBFormat.addPixmap(QtGui.QPixmap(":/Formats/icons/EPUB.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.KFXFormat = QtGui.QIcon()
-        self.KFXFormat.addPixmap(QtGui.QPixmap(":/Formats/icons/KFX.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.MOBIEPUBFormat = QtGui.QIcon()
-        self.MOBIEPUBFormat.addPixmap(QtGui.QPixmap(":/Formats/icons/MOBI.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.EPUB200MBFormat = QtGui.QIcon()
-        self.EPUB200MBFormat.addPixmap(QtGui.QPixmap(":/Formats/icons/EPUB.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
 
         self.info = QtGui.QIcon()
         self.info.addPixmap(QtGui.QPixmap(":/Status/icons/info.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
@@ -224,7 +218,8 @@ class WorkerThread(QtCore.QThread):
         currentJobs = []
 
         options.profile = GUI.profiles[str(GUI.deviceBox.currentText())]['Label']
-        options.format = str(GUI.formatBox.currentText()).replace('/AZW3', '')
+        gui_current_format = GUI.formats[str(GUI.formatBox.currentText())]['format']
+        options.format = gui_current_format
         if GUI.mangaBox.isChecked():
             options.righttoleft = True
         if GUI.rotateBox.checkState() == 1:
@@ -280,7 +275,7 @@ class WorkerThread(QtCore.QThread):
                 return
             self.errors = False
             MW.addMessage.emit('<b>Source:</b> ' + job, 'info', False)
-            if str(GUI.formatBox.currentText()) == 'CBZ':
+            if gui_current_format == 'CBZ':
                 MW.addMessage.emit('Creating CBZ files', 'info', False)
                 GUI.progress.content = 'Creating CBZ files'
             else:
@@ -330,11 +325,11 @@ class WorkerThread(QtCore.QThread):
                 return
             if not self.errors:
                 GUI.progress.content = ''
-                if str(GUI.formatBox.currentText()) == 'CBZ':
+                if gui_current_format == 'CBZ':
                     MW.addMessage.emit('Creating CBZ files... <b>Done!</b>', 'info', True)
                 else:
                     MW.addMessage.emit('Creating EPUB files... <b>Done!</b>', 'info', True)
-                if str(GUI.formatBox.currentText()) == 'MOBI/AZW3' or str(GUI.formatBox.currentText()) == 'MOBI+EPUB':
+                if 'MOBI' in gui_current_format:
                     MW.progressBarTick.emit('Creating MOBI files')
                     MW.progressBarTick.emit(str(len(outputPath) * 2 + 1))
                     MW.progressBarTick.emit('tick')
@@ -648,6 +643,7 @@ class KCCGUI(KCC_ui.Ui_mainWindow):
         if not GUI.webtoonBox.isChecked():
             GUI.qualityBox.setEnabled(profile['PVOptions'])
         GUI.upscaleBox.setChecked(profile['DefaultUpscale'])
+        GUI.mangaBox.setChecked(True)
         if not profile['PVOptions']:
             GUI.qualityBox.setChecked(False)
         if str(GUI.deviceBox.currentText()) == 'Other':
@@ -662,7 +658,7 @@ class KCCGUI(KCC_ui.Ui_mainWindow):
             GUI.formatBox.setCurrentIndex(profile['DefaultFormat'])
         if not GUI.webtoonBox.isChecked():
             GUI.qualityBox.setEnabled(profile['PVOptions'])
-        if str(GUI.formatBox.currentText()) == 'MOBI/AZW3':
+        if GUI.formats[str(GUI.formatBox.currentText())]['format'] == 'MOBI':
             GUI.outputSplit.setEnabled(True)
         else:
             GUI.outputSplit.setEnabled(False)
@@ -744,21 +740,28 @@ class KCCGUI(KCC_ui.Ui_mainWindow):
                 self.addMessage('Target resolution is not set!', 'error')
                 self.needClean = True
                 return
-            if str(GUI.formatBox.currentText()) == 'MOBI/AZW3' and not self.kindleGen:
+            if 'MOBI' in GUI.formats[str(GUI.formatBox.currentText())]['format'] and not self.kindleGen:
                 self.detectKindleGen()
                 if not self.kindleGen:
                     GUI.jobList.clear()
-                    self.addMessage('Cannot find <a href="http://www.amazon.com/gp/feature.html?ie=UTF8&docId='
-                                    '1000765211"><b>KindleGen</b></a>! MOBI conversion is unavailable!', 'error')
-                    if sys.platform.startswith('win'):
-                        self.addMessage('Download it and place EXE in KCC directory.', 'error')
-                    elif sys.platform.startswith('darwin'):
-                        self.addMessage('Install it using <a href="http://brew.sh/">Homebrew</a>.', 'error')
-                    else:
-                        self.addMessage('Download it and place executable in /usr/local/bin directory.', 'error')
+                    self.display_kindlegen_missing()
                     self.needClean = True
                     return
             self.worker.start()
+
+    def display_kindlegen_missing(self):
+        self.addMessage('Cannot find <b>KindleGen</b> from '
+                        '<a href="https://www.amazon.com/b?node=23496309011"><b>Kindle Comic Creator</b></a> or '
+                        '<a href="https://www.amazon.com/Kindle-Previewer/b?ie=UTF8&node=21381691011">'
+                        '<b>Kindle Previewer</b></a>! MOBI conversion is unavailable!', 'error')
+        if sys.platform.startswith('win'):
+            self.addMessage('Download it and place EXE in KCC directory.', 'error')
+        elif sys.platform.startswith('darwin'):
+            self.addMessage('<a href="https://github.com/ciromattia/kcc/wiki/Installation#kindlegen">'
+                            'Install the kindle-comic-creator cask using Homebrew</a> to enable MOBI conversion',
+                            'error')
+        else:
+            self.addMessage('Download it and place executable in /usr/local/bin directory.', 'error')
 
     def saveSettings(self, event):
         if self.conversionAlive:
@@ -853,22 +856,15 @@ class KCCGUI(KCC_ui.Ui_mainWindow):
                 if 'Amazon kindlegen' in line:
                     versionCheck = line.split('V')[1].split(' ')[0]
                     if StrictVersion(versionCheck) < StrictVersion('2.9'):
-                        self.addMessage('Your <a href="http://www.amazon.com/gp/feature.html?ie=UTF8&docId='
-                                        '1000765211">KindleGen</a> is outdated! MOBI conversion might fail.', 'warning')
+                        self.addMessage('Your <a href="https://www.amazon.com/b?node=23496309011">KindleGen</a>'
+                                        ' is outdated! MOBI conversion might fail.', 'warning')
                     break
         else:
             self.kindleGen = False
             if startup:
-                self.addMessage('Cannot find <a href="http://www.amazon.com/gp/feature.html?ie=UTF8&docId=1000765211">'
-                                '<b>KindleGen</b></a>! MOBI conversion will be unavailable!', 'error')
-                if sys.platform.startswith('win'):
-                    self.addMessage('Download it and place EXE in KCC directory.', 'error')
-                elif sys.platform.startswith('darwin'):
-                    self.addMessage('Install it using <a href="http://brew.sh/">Homebrew</a>: '
-                                    '<i>brew install --cask kindle-comic-creator</i> or '
-                                    '<i>brew install --cask kindle-previewer</i>', 'error')
-                else:
-                    self.addMessage('Download it and place executable in /usr/local/bin directory.', 'error')
+                self.display_kindlegen_missing()
+
+
 
     def __init__(self, kccapp, kccwindow):
         global APP, MW, GUI
@@ -918,6 +914,16 @@ class KCCGUI(KCC_ui.Ui_mainWindow):
             if self.windowSize == '0x0':
                 MW.resize(500, 500)
 
+        self.formats = {  # text, icon, data/option_format
+            "MOBI/AZW3": {'icon': 'MOBI', 'format': 'MOBI'},
+            "EPUB": {'icon': 'EPUB', 'format': 'EPUB'},
+            "CBZ": {'icon': 'CBZ', 'format': 'CBZ'},
+            "EPUB (Calibre KFX)": {'icon': 'EPUB', 'format': 'KFX'},
+            "MOBI + EPUB": {'icon': 'MOBI', 'format': 'MOBI+EPUB'},
+            "EPUB (200MB limit)": {'icon': 'EPUB', 'format': 'EPUB-200MB'}
+        }
+
+
         self.profiles = {
             "Kindle Oasis 2/3": {'PVOptions': True, 'ForceExpert': False, 'DefaultFormat': 0,
                                  'DefaultUpscale': True, 'Label': 'KO'},
@@ -926,7 +932,7 @@ class KCCGUI(KCC_ui.Ui_mainWindow):
             "Kindle Voyage": {'PVOptions': True, 'ForceExpert': False, 'DefaultFormat': 0,
                               'DefaultUpscale': True, 'Label': 'KV'},
             "Kindle Scribe": {
-                'PVOptions': True, 'ForceExpert': False, 'DefaultFormat': 0, 'DefaultUpscale': True, 'Label': 'KS',
+                'PVOptions': True, 'ForceExpert': False, 'DefaultFormat': 0, 'DefaultUpscale': False, 'Label': 'KS',
             },
             "Kindle 11": {
                 'PVOptions': True, 'ForceExpert': False, 'DefaultFormat': 0, 'DefaultUpscale': True, 'Label': 'K11',
@@ -1040,8 +1046,8 @@ class KCCGUI(KCC_ui.Ui_mainWindow):
             self.sevenzip = True
         else:
             self.sevenzip = False
-            self.addMessage('Add <a href="http://www.7-zip.org/download.html">7z</a> to PATH!'
-                            ' Processing of archives will be disabled.', 'warning')
+            self.addMessage('<a href="https://github.com/ciromattia/kcc/wiki/Installation#7-zip">Cannot find 7z</a>!'
+                            ' CBZ/CBR/ZIP/etc processing disabled.', 'warning')
         self.detectKindleGen(True)
 
         APP.messageFromOtherInstance.connect(self.handleMessage)
@@ -1082,9 +1088,8 @@ class KCCGUI(KCC_ui.Ui_mainWindow):
                 GUI.deviceBox.addItem(self.icons.deviceKobo, profile)
             else:
                 GUI.deviceBox.addItem(self.icons.deviceKindle, profile)
-        for f in ['MOBI/AZW3', 'EPUB', 'CBZ', 'KFX', 'MOBI+EPUB', 'EPUB-200MB']:
-            format_prefix = f.replace('/AZW3', '').replace('+', '').replace('-', '')
-            GUI.formatBox.addItem(eval('self.icons.' + format_prefix + 'Format'), f)
+        for f in self.formats:
+            GUI.formatBox.addItem(eval('self.icons.' + self.formats[f]['icon'] + 'Format'), f)
         if self.lastDevice > GUI.deviceBox.count():
             self.lastDevice = 0
         if profilesGUI[self.lastDevice] == "Separator":
