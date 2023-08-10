@@ -44,9 +44,9 @@ more information on [installation](https://github.com/ciromattia/kcc/wiki/Instal
 ### DEPENDENCIES
 Following software is required to run Linux version of **KCC** and/or bare sources:
 - Python 3.3+
-- [PyQt5](https://pypi.python.org/pypi/PyQt5) 5.6.0+ (only needed for GUI)
+- [PySide6](https://pypi.org/project/PySide6/) 6.5.1+ (only needed for GUI)
 - [Pillow](https://pypi.python.org/pypi/Pillow/) 4.0.0+ (5.2.0+ needed for WebP support)
-- [psutil](https://pypi.python.org/pypi/psutil) 5.0.0+
+- [psutil](https://pypi.python.org/pypi/psutil) 5.9.5+
 - [python-slugify](https://pypi.python.org/pypi/python-slugify) 1.2.1+, <8.0.0
 - [raven](https://pypi.python.org/pypi/raven) 6.0.0+ (only needed for GUI)
 
@@ -55,22 +55,16 @@ On Debian based distributions these two commands should install all needed depen
 
 
 ```bash
-$ sudo apt-get install -y python3 python3-dev libpng-dev libjpeg-dev p7zip-full p7zip-rar unrar-free libgl1 python3-pyqt5 && \
+$ sudo apt-get install -y python3 python3-dev libpng-dev libjpeg-dev p7zip-full p7zip-rar unrar-free libgl1 && \
     python -m pip install --upgrade pip && \
     python -m pip install --upgrade -r requirements.txt
 ```
 
 
 #### Optional dependencies
-- Qt platform integration plugin for Deepin Desktop Environment
-```bash
-$ sudo apt-get install qt5dxcb-plugin
-```
-
 - KindleGen ~~[(deprecated link)](http://www.amazon.com/gp/feature.html?ie=UTF8&docId=1000765211)~~ v2.9+  (For MOBI generation) 
   - should be placed in a directory reachable by your _PATH_ or in _KCC_ directory
   - `KindleGen` can be found in [Kindle Previewer](https://www.amazon.com/Kindle-Previewer/b?ie=UTF8&node=21381691011)
-    `Amazon Kindle Previewer 3 Folder\lib\fc\bin`,    the usual location in windows is in windows is `C:\Users\user\AppData\Local\Amazon\Kindle Previewer 3\lib\fc\bin\`
   - `KindleGen` can be also be found in [Kindle Comic Creator](https://www.amazon.com/b?node=23496309011)
 - [7z](http://www.7-zip.org/download.html) *(For CBZ/ZIP, CBR/RAR, 7z/CB7 support)*
 - Unrar (no rar in 7z on Fedora)
