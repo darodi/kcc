@@ -31,6 +31,7 @@ from tempfile import mkdtemp, gettempdir, TemporaryFile
 from shutil import move, copytree, rmtree, copyfile
 from multiprocessing import Pool
 from uuid import uuid4
+from natsort import natsorted
 from slugify import slugify as slugify_ext
 from PIL import Image
 from subprocess import STDOUT, PIPE
@@ -722,7 +723,7 @@ def getComicInfo(path, originalpath):
             options.authors.sort()
         else:
             options.authors = ['KCC']
-        if xml.data['Bookmarks']:
+        if xml.data['Bookmarks'] and options.batchsplit == 0:
             options.chapters = xml.data['Bookmarks']
         if xml.data['Summary']:
             options.summary = hescape(xml.data['Summary'])
@@ -757,7 +758,7 @@ def getPanelViewSize(deviceres, size):
 def sanitizeTree(filetree):
     chapterNames = {}
     for root, dirs, files in os.walk(filetree, False):
-        for i, name in enumerate(sorted(files)):
+        for i, name in enumerate(natsorted(files)):
             splitname = os.path.splitext(name)
 
             # file needs kcc at front AND back to avoid renaming issues
@@ -1101,13 +1102,13 @@ def checkTools(source):
         process.communicate()
         if process.returncode != 0 and process.returncode != 7:
             print('ERROR: 7z is missing!')
-            exit(1)
+            sys.exit(1)
     if options.format == 'MOBI':
         kindleGenExitCode = Popen('kindlegen -locale en', stdout=PIPE, stderr=STDOUT, stdin=PIPE, shell=True)
         kindleGenExitCode.communicate()
         if kindleGenExitCode.returncode != 0:
             print('ERROR: KindleGen is missing!')
-            exit(1)
+            sys.exit(1)
 
 
 def checkPre(source):

@@ -49,11 +49,7 @@ class ComicArchive:
                     break
             process.communicate()
             if process.returncode != 0:
-                raise OSError('Archive is corrupted or encrypted.')
-            elif self.type not in ['7Z', 'RAR', 'RAR5', 'ZIP']:
-                raise OSError('Unsupported archive format.')
-        elif self.type not in ['7Z', 'RAR', 'RAR5', 'ZIP']:
-            raise OSError('Unsupported archive format.')
+                raise OSError(process.stdout.strip())
 
     def extract(self, targetdir):
         if not os.path.isdir(targetdir):

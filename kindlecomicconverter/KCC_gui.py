@@ -753,7 +753,7 @@ class KCCGUI(KCC_ui.Ui_mainWindow):
 
     def display_kindlegen_missing(self):
         self.addMessage(
-            '<a href="https://github.com/ciromattia/kcc/wiki/Installation#kindlegen"><b>Cannot find KindleGen</b></a>: MOBI conversion is unavailable!', 
+            '<a href="https://github.com/ciromattia/kcc#kindlegen"><b>Install KindleGen (link)</b></a> to enable MOBI conversion for Kindles!', 
             'error'
         )
 
@@ -944,7 +944,7 @@ class KCCGUI(KCC_ui.Ui_mainWindow):
                               'DefaultUpscale': True, 'Label': 'KV'},
             "Kindle PW 1/2": {'PVOptions': True, 'ForceExpert': False, 'DefaultFormat': 0,
                               'DefaultUpscale': False, 'Label': 'KPW'},
-            "Kindle": {'PVOptions': True, 'ForceExpert': False, 'DefaultFormat': 0,
+            "Kindle 4/5/7/8/10": {'PVOptions': True, 'ForceExpert': False, 'DefaultFormat': 0,
                        'DefaultUpscale': False, 'Label': 'K578'},
             "Kindle DX/DXG": {'PVOptions': False, 'ForceExpert': False, 'DefaultFormat': 2,
                               'DefaultUpscale': False, 'Label': 'KDX'},
@@ -1012,7 +1012,7 @@ class KCCGUI(KCC_ui.Ui_mainWindow):
             "Kindle Voyage",
             "Kindle 2",
             "Kindle 1",
-            "Kindle",
+            "Kindle 4/5/7/8/10",
             "Separator",
             "Kobo Aura",
             "Kobo Aura ONE",
@@ -1046,8 +1046,8 @@ class KCCGUI(KCC_ui.Ui_mainWindow):
             self.sevenzip = True
         else:
             self.sevenzip = False
-            self.addMessage('<a href="https://github.com/ciromattia/kcc/wiki/Installation#7-zip">Cannot find 7z</a>!'
-                            ' CBZ/CBR/ZIP/etc processing disabled.', 'warning')
+            self.addMessage('<a href="https://github.com/ciromattia/kcc#7-zip">Install 7z (link)</a>'
+                            ' to enable CBZ/CBR/ZIP/etc processing.', 'warning')
         self.detectKindleGen(True)
 
         APP.messageFromOtherInstance.connect(self.handleMessage)

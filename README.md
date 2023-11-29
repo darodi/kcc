@@ -30,9 +30,7 @@ If you find **KCC** valuable you can consider donating to the authors:
   - [![Donate Bitcoin](https://img.shields.io/badge/Donate-Bitcoin-green.svg)](https://jastrzeb.ski/donate/)
 
 
-## INSTALLATION 
-
-### DOWNLOADS
+## DOWNLOADS
 
 - **https://github.com/ciromattia/kcc/releases**
 
@@ -42,40 +40,41 @@ You probably want either
 - `kcc_*.*.*.exe` (Windows)
 - `KindleComicConverter_osx_*.*.*.dmg` (Mac)
 
-Installation Wiki: https://github.com/ciromattia/kcc/wiki/Installation
+The `c2e` and `c2p` versions are command line tools for power users.
 
-- flatpak : https://flathub.org/apps/details/io.github.ciromattia.kcc
-- Docker: https://github.com/ciromattia/kcc/pkgs/container/kcc
+On Windows 11, you may need to run in compatibility mode for an older Windows version.
 
-### DEPENDENCIES
-Following software is required to run Linux version of **KCC** and/or bare sources:
-- Python 3.3+
-- [PySide6](https://pypi.org/project/PySide6/) 6.5.1+ (only needed for GUI)
-- [Pillow](https://pypi.python.org/pypi/Pillow/) 4.0.0+ (5.2.0+ needed for WebP support)
-- [psutil](https://pypi.python.org/pypi/psutil) 5.9.5+
-- [python-slugify](https://pypi.python.org/pypi/python-slugify) 1.2.1+, <8.0.0
-- [raven](https://pypi.python.org/pypi/raven) 6.0.0+ (only needed for GUI)
+On Mac, right click open to get past the security warning.
 
-On Debian based distributions these two commands should install all needed dependencies:
+For flatpak, Docker, amd AppImage versions, refer to the wiki: https://github.com/ciromattia/kcc/wiki/Installation
 
+## INSTALL DEPENDENCIES
 
+You'll need to install various tools to access important but optional features.
 
-```bash
-$ sudo apt-get install -y python3 python3-dev libpng-dev libjpeg-dev p7zip-full p7zip-rar unrar-free libgl1 && \
-    python -m pip install --upgrade pip && \
-    python -m pip install --upgrade -r requirements.txt
+The installation process has been greatly streamlined. No need to add 7z to PATH or locate KindleGen from the internet and put it in a special folder with KCC. Just run it and KCC will tell you what to install.
+
+### 7-Zip
+
+#### Windows 7-Zip
+
+First install 7z from https://www.7-zip.org/ or with command line:
+```
+winget install --id 7zip.7zip
 ```
 
+#### macOS 7-Zip/Unar
+with [Homebrew](https://brew.sh/) installed
+```
+brew install p7zip
+brew install unar
+```
 
-#### Optional dependencies
-- KindleGen ~~[(deprecated link)](http://www.amazon.com/gp/feature.html?ie=UTF8&docId=1000765211)~~ v2.9+  (For MOBI generation) 
-  - should be placed in a directory reachable by your _PATH_ or in _KCC_ directory
-  - `KindleGen` can be found in [Kindle Previewer](https://www.amazon.com/Kindle-Previewer/b?ie=UTF8&node=21381691011)
-  - `KindleGen` can be also be found in [Kindle Comic Creator](https://www.amazon.com/b?node=23496309011)
-- [7z](http://www.7-zip.org/download.html) *(For CBZ/ZIP, CBR/RAR, 7z/CB7 support)*
-- Unrar (no rar in 7z on Fedora)
+### KindleGen
 
+#### Windows / macOS KindleGen
 
+Install [Kindle Previewer 3 (KP3)](https://www.amazon.com/Kindle-Previewer/b?ie=UTF8&node=21381691011). KCC will automatically detect KindleGen from it.
 
 ## INPUT FORMATS
 **KCC** can understand and convert, at the moment, the following input types:
