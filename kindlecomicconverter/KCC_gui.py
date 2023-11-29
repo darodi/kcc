@@ -32,7 +32,7 @@ from PySide6.QtCore import Qt
 from xml.sax.saxutils import escape
 from psutil import Popen, Process
 from copy import copy
-from distutils.version import StrictVersion
+from packaging.version import Version
 from raven import Client
 from tempfile import gettempdir
 from .shared import HTMLStripper, sanitizeTrace, walkLevel
@@ -149,9 +149,9 @@ class VersionThread(QtCore.QThread):
             latest_version = json_parser["tag_name"]
             latest_version = re.sub(r'^v', "", latest_version)
 
-            if ("b" not in __version__ and StrictVersion(latest_version) > StrictVersion(__version__)) \
+            if ("b" not in __version__ and Version(latest_version) > Version(__version__)) \
                     or ("b" in __version__
-                        and StrictVersion(latest_version) >= StrictVersion(re.sub(r'b.*', '', __version__))):
+                        and Version(latest_version) >= Version(re.sub(r'b.*', '', __version__))):
                 MW.addMessage.emit('<a href="' + html_url + '"><b>The new version is available!</b></a>', 'warning',
                                    False)
         except Exception:
@@ -844,12 +844,12 @@ class KCCGUI(KCC_ui.Ui_mainWindow):
         kindleGenExitCode.communicate()
         if kindleGenExitCode.returncode == 0:
             self.kindleGen = True
-            versionCheck = Popen('kindlegen -locale en', stdout=PIPE, stderr=STDOUT, stdin=PIPE, shell=True)
-            for line in versionCheck.stdout:
+            version_check = Popen('kindlegen -locale en', stdout=PIPE, stderr=STDOUT, stdin=PIPE, shell=True)
+            for line in version_check.stdout:
                 line = line.decode("utf-8")
                 if 'Amazon kindlegen' in line:
-                    versionCheck = line.split('V')[1].split(' ')[0]
-                    if StrictVersion(versionCheck) < StrictVersion('2.9'):
+                    version_check = line.split('V')[1].split(' ')[0]
+                    if Version(version_check) < Version('2.9'):
                         self.addMessage('Your <a href="https://www.amazon.com/b?node=23496309011">KindleGen</a>'
                                         ' is outdated! MOBI conversion might fail.', 'warning')
                     break

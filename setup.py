@@ -12,9 +12,9 @@ Create EXE/APP:
 
 import os
 import sys
-import shutil
+
 import setuptools
-import distutils.cmd
+
 from kindlecomicconverter import __version__
 
 NAME = 'KindleComicConverter'
@@ -23,7 +23,7 @@ VERSION = __version__
 
 
 # noinspection PyUnresolvedReferences
-class BuildBinaryCommand(distutils.cmd.Command):
+class BuildBinaryCommand(setuptools.Command):
     description = 'build binary release'
     user_options = []
 
@@ -35,18 +35,18 @@ class BuildBinaryCommand(distutils.cmd.Command):
 
     # noinspection PyShadowingNames
     def run(self):
-        VERSION = __version__
+        version = __version__
         if sys.platform == 'darwin':
             os.system('pyinstaller -y -D -i icons/comic2ebook.icns -n "Kindle Comic Converter" -w -s kcc.py')
             # TODO /usr/bin/codesign --force -s "$MACOS_CERTIFICATE_NAME" --options runtime dist/Applications/Kindle\ Comic\ Converter.app -v
-            os.system('appdmg kcc.json dist/KindleComicConverter_osx_' + VERSION + '.dmg')
+            os.system('appdmg kcc.json dist/KindleComicConverter_osx_' + version + '.dmg')
             sys.exit(0)
         elif sys.platform == 'win32':
-            os.system('pyinstaller -y -F -i icons\\comic2ebook.ico -n KCC_' + VERSION + ' -w --noupx kcc.py')
+            os.system('pyinstaller -y -F -i icons\\comic2ebook.ico -n KCC_' + version + ' -w --noupx kcc.py')
             sys.exit(0)
         elif sys.platform == 'linux':
             os.system(
-                'pyinstaller --hidden-import=queue -y -F -i icons/comic2ebook.ico -n kcc_linux_' + VERSION + ' kcc.py')
+                'pyinstaller --hidden-import=queue -y -F -i icons/comic2ebook.ico -n kcc_linux_' + version + ' kcc.py')
             sys.exit(0)
         else:
             sys.exit(0)
