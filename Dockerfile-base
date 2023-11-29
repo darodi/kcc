@@ -1,4 +1,4 @@
-FROM --platform=linux/amd64 python:3.12-slim-bullseye as compile-amd64
+FROM --platform=linux/amd64 python:3.12-slim as compile-amd64
 ARG TARGETOS
 ARG TARGETARCH
 ARG TARGETVARIANT
@@ -16,7 +16,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update -y && apt-get -yq upgrade && \
 
 ######################################################################################
 
-FROM --platform=linux/arm64 python:3.12-slim-bullseye as compile-arm64
+FROM --platform=linux/arm64 python:3.12-slim as compile-arm64
 ARG TARGETOS
 ARG TARGETARCH
 ARG TARGETVARIANT
@@ -34,6 +34,7 @@ RUN set -x && \
     # Packages only required during build
     TEMP_PACKAGES+=(build-essential) && \
     TEMP_PACKAGES+=(cmake) && \
+    TEMP_PACKAGES+=(gcc) && \
     TEMP_PACKAGES+=(libfreetype6-dev) && \
     TEMP_PACKAGES+=(libfontconfig1-dev) && \
     TEMP_PACKAGES+=(libpng-dev) && \
@@ -66,12 +67,12 @@ RUN set -x && \
     python -m pip install --upgrade pip && \
 #    python -m pip install -r /opt/kcc/requirements.txt && \
     python -m venv /opt/venv && \
-    python -m pip install --upgrade pillow python-slugify psutil raven mozjpeg-lossless-optimization
+    python -m pip install --upgrade pillow python-slugify psutil raven mozjpeg_lossless_optimization packaging python-slugify Pillow natsort
 
 
 ######################################################################################
 
-FROM --platform=linux/arm/v7 python:3.12-slim-bullseye as compile-armv7
+FROM --platform=linux/arm/v7 python:3.12-slim as compile-armv7
 ARG TARGETOS
 ARG TARGETARCH
 ARG TARGETVARIANT
@@ -89,6 +90,7 @@ RUN set -x && \
     # Packages only required during build
     TEMP_PACKAGES+=(build-essential) && \
     TEMP_PACKAGES+=(cmake) && \
+    TEMP_PACKAGES+=(gcc) && \
     TEMP_PACKAGES+=(libffi-dev) && \
     TEMP_PACKAGES+=(libfreetype6-dev) && \
     TEMP_PACKAGES+=(libfontconfig1-dev) && \
@@ -122,17 +124,16 @@ RUN set -x && \
     python -m pip install --upgrade pip && \
 #    python -m pip install -r /opt/kcc/requirements.txt && \
     python -m venv /opt/venv && \
-    python -m pip install --upgrade pillow python-slugify psutil raven mozjpeg-lossless-optimization
-
+    python -m pip install --upgrade pillow python-slugify psutil raven mozjpeg_lossless_optimization packaging python-slugify Pillow natsort
 
 ######################################################################################
-FROM --platform=linux/amd64 python:3.12-slim-bullseye as build-amd64
+FROM --platform=linux/amd64 python:3.12-slim as build-amd64
 COPY --from=compile-amd64 /opt/venv /opt/venv
 
-FROM --platform=linux/arm64 python:3.12-slim-bullseye as build-arm64
+FROM --platform=linux/arm64 python:3.12-slim as build-arm64
 COPY --from=compile-arm64 /opt/venv /opt/venv
 
-FROM --platform=linux/arm/v7 python:3.12-slim-bullseye as build-armv7
+FROM --platform=linux/arm/v7 python:3.12-slim as build-armv7
 COPY --from=compile-armv7 /opt/venv /opt/venv
 ######################################################################################
 
@@ -156,5 +157,5 @@ WORKDIR /app
 RUN DEBIAN_FRONTEND=noninteractive apt-get update -y && apt-get -yq upgrade && \
     apt-get install -y p7zip-full unrar-free  && \
     ln -s /app/kindlegen /bin/kindlegen && \
-    echo docker-base-20231129 > /IMAGE_VERSION
+    echo docker-base-20231129-2 > /IMAGE_VERSION
 
