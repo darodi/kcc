@@ -28,6 +28,8 @@ If you find **KCC** valuable you can consider donating to the authors:
 - Paweł Jastrzębski:
   - [![Donate PayPal](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=YTTJ4LK2JDHPS)
   - [![Donate Bitcoin](https://img.shields.io/badge/Donate-Bitcoin-green.svg)](https://jastrzeb.ski/donate/)
+- Alex Xu
+  - [![Donate PayPal](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/donate/?business=QFJVE7A6LCP6U&no_recurring=0&item_name=Kindle+Comic+Converter&currency_code=USD)
 
 
 ## DOWNLOADS
@@ -46,9 +48,9 @@ On Windows 11, you may need to run in compatibility mode for an older Windows ve
 
 On Mac, right click open to get past the security warning.
 
-For flatpak, Docker, amd AppImage versions, refer to the wiki: https://github.com/ciromattia/kcc/wiki/Installation
+For flatpak, Docker, and AppImage versions, refer to the wiki: https://github.com/ciromattia/kcc/wiki/Installation
 
-## INSTALL DEPENDENCIES
+## PREREQUISITES
 
 You'll need to install various tools to access important but optional features.
 
@@ -74,7 +76,7 @@ brew install unar
 
 #### Windows / macOS KindleGen
 
-Install [Kindle Previewer 3 (KP3)](https://www.amazon.com/Kindle-Previewer/b?ie=UTF8&node=21381691011). KCC will automatically detect KindleGen from it.
+Install [Kindle Previewer](https://www.amazon.com/Kindle-Previewer/b?ie=UTF8&node=21381691011). KCC will automatically detect KindleGen from it.
 
 ## INPUT FORMATS
 **KCC** can understand and convert, at the moment, the following input types:
@@ -209,7 +211,12 @@ OTHER:
 ```
 
 ## CREDITS
-**KCC** is made by [Ciro Mattia Gonano](http://github.com/ciromattia), [Paweł Jastrzębski](http://github.com/AcidWeb) and [Darodi](http://github.com/darodi)  .
+**KCC** is made by 
+
+- [Ciro Mattia Gonano](http://github.com/ciromattia)
+- [Paweł Jastrzębski](http://github.com/AcidWeb)
+- [Darodi](http://github.com/darodi)
+- [Alex Xu](http://github.com/axu2)
 
 This script born as a cross-platform alternative to `KindleComicParser` by **Dc5e** (published [here](http://www.mobileread.com/forums/showthread.php?t=192783)).
 

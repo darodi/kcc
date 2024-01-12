@@ -16,26 +16,27 @@
 # OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
 # TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
 # PERFORMANCE OF THIS SOFTWARE.
-import json
 import os
 import re
 import subprocess
 import sys
 from urllib.parse import unquote
-from urllib.request import urlopen
 from time import sleep
 from shutil import move, rmtree
 from subprocess import STDOUT, PIPE
+
+import requests
 # noinspection PyUnresolvedReferences
 from PySide6 import QtGui, QtCore, QtWidgets, QtNetwork
 from PySide6.QtCore import Qt
 from xml.sax.saxutils import escape
-from psutil import Popen, Process
+from psutil import Process
 from copy import copy
 from packaging.version import Version
 from raven import Client
 from tempfile import gettempdir
-from .shared import HTMLStripper, sanitizeTrace, walkLevel
+
+from .shared import HTMLStripper, sanitizeTrace, walkLevel, subprocess_run_silent
 from . import __version__
 from . import comic2ebook
 from . import metadata
@@ -140,10 +141,7 @@ class VersionThread(QtCore.QThread):
 
     def run(self):
         try:
-            last_version_url = urlopen("https://api.github.com/repos/ciromattia/kcc/releases/latest")
-            data = last_version_url.read()
-            encoding = last_version_url.info().get_content_charset('utf-8')
-            json_parser = json.loads(data.decode(encoding))
+            json_parser = requests.get("https://api.github.com/repos/ciromattia/kcc/releases/latest").json()
 
             html_url = json_parser["html_url"]
             latest_version = json_parser["tag_name"]
@@ -264,6 +262,8 @@ class WorkerThread(QtCore.QThread):
         if GUI.currentMode > 2:
             options.customwidth = str(GUI.widthBox.value())
             options.customheight = str(GUI.heightBox.value())
+        if GUI.targetDirectory != '':
+            options.output = GUI.targetDirectory
 
         for i in range(GUI.jobList.count()):
             # Make sure that we don't consider any system message as job to do
@@ -441,7 +441,7 @@ class SystemTrayIcon(QtWidgets.QSystemTrayIcon):
         MW.activateWindow()
 
     def addTrayMessage(self, message, icon):
-        icon = eval('QtWidgets.QSystemTrayIcon.MessageIcon.' + icon)
+        icon = getattr(QtWidgets.QSystemTrayIcon.MessageIcon, icon)
         if self.supportsMessages() and not MW.isActiveWindow():
             self.showMessage('Kindle Comic Converter', message, icon)
 
@@ -673,7 +673,7 @@ class KCCGUI(KCC_ui.Ui_mainWindow):
 
     def addMessage(self, message, icon, replace=False):
         if icon != '':
-            icon = eval('self.icons.' + icon)
+            icon = getattr(self.icons, icon)
             item = QtWidgets.QListWidgetItem(icon, '   ' + self.stripTags(message))
         else:
             item = QtWidgets.QListWidgetItem('   ' + self.stripTags(message))
@@ -840,31 +840,20 @@ class KCCGUI(KCC_ui.Ui_mainWindow):
                 os.chmod('/usr/local/bin/kindlegen', 0o755)
             except Exception:
                 pass
-        kindleGenExitCode = Popen('kindlegen -locale en', stdout=PIPE, stderr=STDOUT, stdin=PIPE, shell=True)
-        kindleGenExitCode.communicate()
-        if kindleGenExitCode.returncode == 0:
+        try:
+            versionCheck = subprocess_run_silent(['kindlegen', '-locale', 'en'], stdout=PIPE, stderr=STDOUT, encoding='UTF-8')
             self.kindleGen = True
-            version_check = Popen('kindlegen -locale en', stdout=PIPE, stderr=STDOUT, stdin=PIPE, shell=True)
-            for line in version_check.stdout:
-                line = line.decode("utf-8")
+            for line in versionCheck.stdout.splitlines():
                 if 'Amazon kindlegen' in line:
                     version_check = line.split('V')[1].split(' ')[0]
                     if Version(version_check) < Version('2.9'):
                         self.addMessage('Your <a href="https://www.amazon.com/b?node=23496309011">KindleGen</a>'
                                         ' is outdated! MOBI conversion might fail.', 'warning')
                     break
-            where_command = 'where kindlegen.exe'
-            if os.name == 'posix':
-                where_command = 'which kindlegen'
-            process = subprocess.run(where_command, stdout=PIPE, stderr=STDOUT, stdin=PIPE, shell=True)
-            locations = process.stdout.decode('utf-8').split('\n')
-            self.addMessage(f"<b>KindleGen Found:</b> {locations[0]}", 'info')
-        else:
+        except FileNotFoundError:
             self.kindleGen = False
             if startup:
                 self.display_kindlegen_missing()
-
-
 
     def __init__(self, kccapp, kccwindow):
         global APP, MW, GUI
@@ -907,10 +896,10 @@ class KCCGUI(KCC_ui.Ui_mainWindow):
         elif sys.platform.startswith('darwin'):
             for element in ['editorButton', 'wikiButton', 'directoryButton', 'clearButton', 'fileButton', 'deviceBox',
                             'convertButton', 'formatBox']:
-                eval('GUI.' + element).setMinimumSize(QtCore.QSize(0, 0))
+                getattr(GUI, element).setMinimumSize(QtCore.QSize(0, 0))
             GUI.gridLayout.setContentsMargins(-1, -1, -1, -1)
             for element in ['gridLayout_2', 'gridLayout_3', 'gridLayout_4', 'horizontalLayout', 'horizontalLayout_2']:
-                eval('GUI.' + element).setContentsMargins(-1, 0, -1, 0)
+                getattr(GUI, element).setContentsMargins(-1, 0, -1, 0)
             if self.windowSize == '0x0':
                 MW.resize(500, 500)
 
@@ -925,9 +914,9 @@ class KCCGUI(KCC_ui.Ui_mainWindow):
 
 
         self.profiles = {
-            "Kindle Oasis 2/3": {'PVOptions': True, 'ForceExpert': False, 'DefaultFormat': 0,
+            "Kindle Oasis 9/10": {'PVOptions': True, 'ForceExpert': False, 'DefaultFormat': 0,
                                  'DefaultUpscale': True, 'Label': 'KO'},
-            "Kindle Oasis": {'PVOptions': True, 'ForceExpert': False, 'DefaultFormat': 0,
+            "Kindle Oasis 8": {'PVOptions': True, 'ForceExpert': False, 'DefaultFormat': 0,
                              'DefaultUpscale': True, 'Label': 'KV'},
             "Kindle Voyage": {'PVOptions': True, 'ForceExpert': False, 'DefaultFormat': 0,
                               'DefaultUpscale': True, 'Label': 'KV'},
@@ -937,16 +926,16 @@ class KCCGUI(KCC_ui.Ui_mainWindow):
             "Kindle 11": {
                 'PVOptions': True, 'ForceExpert': False, 'DefaultFormat': 0, 'DefaultUpscale': True, 'Label': 'K11',
             },
-            "Kindle PW 5": {
+            "Kindle PW 11": {
                 'PVOptions': True, 'ForceExpert': False, 'DefaultFormat': 0, 'DefaultUpscale': True, 'Label': 'KPW5',
             },
-            "Kindle PW 3/4": {'PVOptions': True, 'ForceExpert': False, 'DefaultFormat': 0,
+            "Kindle PW 7/10": {'PVOptions': True, 'ForceExpert': False, 'DefaultFormat': 0,
                               'DefaultUpscale': True, 'Label': 'KV'},
-            "Kindle PW 1/2": {'PVOptions': True, 'ForceExpert': False, 'DefaultFormat': 0,
+            "Kindle PW 5/6": {'PVOptions': True, 'ForceExpert': False, 'DefaultFormat': 0,
                               'DefaultUpscale': False, 'Label': 'KPW'},
             "Kindle 4/5/7/8/10": {'PVOptions': True, 'ForceExpert': False, 'DefaultFormat': 0,
                        'DefaultUpscale': False, 'Label': 'K578'},
-            "Kindle DX/DXG": {'PVOptions': False, 'ForceExpert': False, 'DefaultFormat': 2,
+            "Kindle DX": {'PVOptions': False, 'ForceExpert': False, 'DefaultFormat': 2,
                               'DefaultUpscale': False, 'Label': 'KDX'},
             "Kobo Mini/Touch": {'PVOptions': False, 'ForceExpert': False, 'DefaultFormat': 1,
                                 'DefaultUpscale': False, 'Label': 'KoMT'},
@@ -990,10 +979,10 @@ class KCCGUI(KCC_ui.Ui_mainWindow):
                       'Label': 'OTHER'},
         }
         profilesGUI = [
-            "Kindle Oasis 2/3",
-            "Kindle PW 5",
-            "Kindle 11",
             "Kindle Scribe",
+            "Kindle 11",
+            "Kindle PW 11",
+            "Kindle Oasis 9/10",
             "Separator",
             "Kobo Clara 2E",
             "Kobo Sage",
@@ -1003,16 +992,16 @@ class KCCGUI(KCC_ui.Ui_mainWindow):
             "Separator",
             "Other",
             "Separator",
-            "Kindle Oasis",
+            "Kindle Oasis 8",
+            "Kindle PW 7/10",
+            "Kindle Voyage",
+            "Kindle PW 5/6",
+            "Kindle 4/5/7/8/10",
             "Kindle Touch",
             "Kindle Keyboard",
-            "Kindle DX/DXG",
-            "Kindle PW 3/4",
-            "Kindle PW 1/2",
-            "Kindle Voyage",
+            "Kindle DX",
             "Kindle 2",
             "Kindle 1",
-            "Kindle 4/5/7/8/10",
             "Separator",
             "Kobo Aura",
             "Kobo Aura ONE",
@@ -1040,11 +1029,10 @@ class KCCGUI(KCC_ui.Ui_mainWindow):
             self.addMessage('Since you are a new user of <b>KCC</b> please see few '
                             '<a href="https://github.com/ciromattia/kcc/wiki/Important-tips">important tips</a>.',
                             'info')
-        process = Popen('7z', stdout=PIPE, stderr=STDOUT, stdin=PIPE, shell=True)
-        process.communicate()
-        if process.returncode == 0 or process.returncode == 7:
+        try:
+            subprocess_run_silent(['7z'], stdout=PIPE, stderr=STDOUT)
             self.sevenzip = True
-        else:
+        except FileNotFoundError:
             self.sevenzip = False
             self.addMessage('<a href="https://github.com/ciromattia/kcc#7-zip">Install 7z (link)</a>'
                             ' to enable CBZ/CBR/ZIP/etc processing.', 'warning')
@@ -1089,7 +1077,7 @@ class KCCGUI(KCC_ui.Ui_mainWindow):
             else:
                 GUI.deviceBox.addItem(self.icons.deviceKindle, profile)
         for f in self.formats:
-            GUI.formatBox.addItem(eval('self.icons.' + self.formats[f]['icon'] + 'Format'), f)
+            GUI.formatBox.addItem(getattr(self.icons, self.formats[f]['icon'] + 'Format'), f)
         if self.lastDevice > GUI.deviceBox.count():
             self.lastDevice = 0
         if profilesGUI[self.lastDevice] == "Separator":
@@ -1115,8 +1103,8 @@ class KCCGUI(KCC_ui.Ui_mainWindow):
                     self.changeCroppingPower(int(self.options[option]))
             else:
                 try:
-                    if eval('GUI.' + str(option)).isEnabled():
-                        eval('GUI.' + str(option)).setCheckState(Qt.CheckState(self.options[option]))
+                    if getattr(GUI, option).isEnabled():
+                        getattr(GUI, option).setCheckState(Qt.CheckState(self.options[option]))
                 except AttributeError:
                     pass
         self.worker.sync()
