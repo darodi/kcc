@@ -2,8 +2,8 @@
 
 
 
-[![GitHub release](https://img.shields.io/github/release/ciromattia/kcc.svg)](https://github.com/ciromattia/kcc/releases) 
-[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/ciromattia/kcc/docker-publish.yml?label=docker%20build)](https://github.com/ciromattia/kcc/pkgs/container/kcc) 
+[![GitHub release](https://img.shields.io/github/release/ciromattia/kcc.svg)](https://github.com/ciromattia/kcc/releases)
+[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/ciromattia/kcc/docker-publish.yml?label=docker%20build)](https://github.com/ciromattia/kcc/pkgs/container/kcc)
 
 
 **Kindle Comic Converter** is a Python app to convert comic/manga files or folders to EPUB, Panel View MOBI or E-Ink optimized CBZ.
@@ -36,9 +36,9 @@ If you find **KCC** valuable you can consider donating to the authors:
 
 - **https://github.com/ciromattia/kcc/releases**
 
-Click on **Assets** of the latest release. 
+Click on **Assets** of the latest release.
 
-You probably want either 
+You probably want either
 - `kcc_*.*.*.exe` (Windows)
 - `KindleComicConverter_osx_*.*.*.dmg` (Mac)
 
@@ -211,7 +211,7 @@ OTHER:
 ```
 
 ## CREDITS
-**KCC** is made by 
+**KCC** is made by
 
 - [Ciro Mattia Gonano](http://github.com/ciromattia)
 - [Paweł Jastrzębski](http://github.com/AcidWeb)
@@ -246,5 +246,5 @@ The app relies and includes the following scripts:
 Please check [wiki page](https://github.com/ciromattia/kcc/wiki/Known-issues).
 
 ## COPYRIGHT
-Copyright (c) 2012-2023 Ciro Mattia Gonano, Paweł Jastrzębski and Darodi.   
+Copyright (c) 2012-2023 Ciro Mattia Gonano, Paweł Jastrzębski and Darodi.
 **KCC** is released under ISC LICENSE; see [LICENSE.txt](./LICENSE.txt) for further details.
