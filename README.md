@@ -2,8 +2,8 @@
 
 
 
-[![GitHub release](https://img.shields.io/github/release/ciromattia/kcc.svg)](https://github.com/ciromattia/kcc/releases) 
-[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/ciromattia/kcc/docker-publish.yml?label=docker%20build)](https://github.com/ciromattia/kcc/pkgs/container/kcc) 
+[![GitHub release](https://img.shields.io/github/release/ciromattia/kcc.svg)](https://github.com/ciromattia/kcc/releases)
+[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/ciromattia/kcc/docker-publish.yml?label=docker%20build)](https://github.com/ciromattia/kcc/pkgs/container/kcc)
 
 
 **Kindle Comic Converter** is a Python app to convert comic/manga files or folders to EPUB, Panel View MOBI or E-Ink optimized CBZ.
@@ -36,9 +36,9 @@ If you find **KCC** valuable you can consider donating to the authors:
 
 - **https://github.com/ciromattia/kcc/releases**
 
-Click on **Assets** of the latest release. 
+Click on **Assets** of the latest release.
 
-You probably want either 
+You probably want either
 - `KCC_*.*.*.exe` (Windows)
 - `kcc_macos_arm_*.*.*.dmg` (recent Mac with Apple Silicon M1 chip or later)
 - `kcc_macos_i386_*.*.*.dmg` (older Mac with Intel chip)
@@ -51,33 +51,28 @@ On Mac, right click open to get past the security warning.
 
 For flatpak, Docker, and AppImage versions, refer to the wiki: https://github.com/ciromattia/kcc/wiki/Installation
 
+## FAQ
+
+- [Kindle Scribe cover guide](https://github.com/ciromattia/kcc/issues/508) (also works for older Kindles)
+- [Windows 7 support](https://github.com/ciromattia/kcc/issues/678)
+
 ## PREREQUISITES
 
-You'll need to install various tools to access important but optional features.
-
-The installation process has been greatly streamlined. No need to add 7z to PATH or locate KindleGen from the internet and put it in a special folder with KCC. Just run it and KCC will tell you what to install.
-
-### 7-Zip
-
-#### Windows 7-Zip
-
-First install 7z from https://www.7-zip.org/ or with command line:
-```
-winget install --id 7zip.7zip
-```
-
-#### macOS 7-Zip/Unar
-with [Homebrew](https://brew.sh/) installed
-```
-brew install p7zip
-brew install unar
-```
+You'll need to install various tools to access important but optional features. Close and re-open KCC to get KCC to detect them.
 
 ### KindleGen
 
 #### Windows / macOS KindleGen
 
-Install [Kindle Previewer](https://www.amazon.com/Kindle-Previewer/b?ie=UTF8&node=21381691011). KCC will automatically detect KindleGen from it.
+Install [Kindle Previewer](https://www.amazon.com/Kindle-Previewer/b?ie=UTF8&node=21381691011) and `kindlegen` will be autodetected from it.
+
+If you have issues detecting it, or use another OS, refer to the wiki: https://github.com/ciromattia/kcc/wiki/Installation#kindlegen
+
+### 7-Zip
+
+This is no longer required as of KCC 6.1. 
+
+If you still need it, refer to the wiki: https://github.com/ciromattia/kcc/wiki/Installation#7-zip
 
 ## INPUT FORMATS
 **KCC** can understand and convert, at the moment, the following input types:
@@ -123,13 +118,14 @@ sudo apt-get install python3 p7zip-full python3-pil python3-psutil python3-slugi
         'KoAO': ("Kobo Aura ONE", (1404, 1872), Palette16, 1.8),
         'KoN': ("Kobo Nia", (758, 1024), Palette16, 1.8),
         'KoC': ("Kobo Clara HD/Kobo Clara 2E", (1072, 1448), Palette16, 1.8),
+        'KoCC': ("Kobo Clara Colour", (1072, 1448), Palette16, 1.8),
         'KoL': ("Kobo Libra H2O/Kobo Libra 2", (1264, 1680), Palette16, 1.8),
+        'KoLC': ("Kobo Libra Colour", (1264, 1680), Palette16, 1.8),
         'KoF': ("Kobo Forma", (1440, 1920), Palette16, 1.8),
         'KoS': ("Kobo Sage", (1440, 1920), Palette16, 1.8),
         'KoE': ("Kobo Elipsa", (1404, 1872), Palette16, 1.8),
         'OTHER': ("Other", (0, 0), Palette16, 1.8),
 ```
-
 
 ### Standalone `kcc-c2e.py` usage:
 
@@ -211,8 +207,56 @@ OTHER:
   -h, --help            Show this help message and exit
 ```
 
+## INSTALL FROM SOURCE
+
+This section is for developers who want to contribute to KCC or power users who want to run the latest code without waiting for an official release.
+
+Easiest to use [GitHub Desktop](https://desktop.github.com) to clone the KCC repo. From GitHub Desktop, click on `Repository` in the toolbar, then `Command Prompt` (Windows)/`Terminal` (Mac) to open a window in the KCC repo.
+
+Depending on your system [Python](https://www.python.org) may be called either `python` or `python3`. We use virtual environments (venv) to manage dependencies.
+
+If you want to edit the code, a good code editor is [VS Code](https://code.visualstudio.com).
+
+If you want to edit the `.ui` files, use [Qt Creator](https://www.qt.io/download-qt-installer-oss), included in **Qt for desktop development**.
+Then use the `gen_ui_files` scripts to autogenerate the python UI.
+
+
+### Windows install from source
+
+One time setup and running for the first time:
+```
+python -m venv venv
+venv\Scripts\activate.bat
+pip install -r requirements.txt
+python kcc.py
+```
+
+Every time you close Command Prompt, you will need to re-activate the virtual environment and re-run:
+
+```
+venv\Scripts\activate.bat
+python kcc.py
+```
+
+### macOS install from source
+
+One time setup and running for the first time:
+```
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+python kcc.py
+```
+
+Every time you close Terminal, you will need to reactivate the virtual environment and re-run:
+
+```
+source venv/bin/activate
+python kcc.py
+```
+
 ## CREDITS
-**KCC** is made by 
+**KCC** is made by
 
 - [Ciro Mattia Gonano](http://github.com/ciromattia)
 - [Paweł Jastrzębski](http://github.com/AcidWeb)
@@ -247,5 +291,5 @@ The app relies and includes the following scripts:
 Please check [wiki page](https://github.com/ciromattia/kcc/wiki/Known-issues).
 
 ## COPYRIGHT
-Copyright (c) 2012-2023 Ciro Mattia Gonano, Paweł Jastrzębski and Darodi.   
+Copyright (c) 2012-2023 Ciro Mattia Gonano, Paweł Jastrzębski and Darodi.
 **KCC** is released under ISC LICENSE; see [LICENSE.txt](./LICENSE.txt) for further details.

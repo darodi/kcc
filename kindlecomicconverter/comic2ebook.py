@@ -21,7 +21,6 @@
 import os
 import pathlib
 import re
-import subprocess
 import sys
 from argparse import ArgumentParser
 from time import strftime, gmtime
@@ -36,7 +35,7 @@ from multiprocessing import Pool
 from uuid import uuid4
 from natsort import os_sorted
 from slugify import slugify as slugify_ext
-from PIL import Image
+from PIL import Image, ImageFile
 from subprocess import STDOUT, PIPE
 from psutil import virtual_memory, disk_usage
 from html import escape as hescape
@@ -49,6 +48,8 @@ from . import dualmetafix
 from . import metadata
 from . import kindle
 from . import __version__
+
+ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 
 def main(argv=None):
@@ -502,15 +503,18 @@ def buildEPUB(path, chapternames, tomenumber):
         chapter = False
         dirnames, filenames = walkSort(dirnames, filenames)
         for afile in filenames:
+            if cover is None:
+                cover = os.path.join(os.path.join(path, 'OEBPS', 'Images'),
+                                     'cover' + getImageFileName(afile)[1])
+                options.covers.append((image.Cover(os.path.join(dirpath, afile), cover, options,
+                                                   tomenumber), options.uuid))
+                if options.dedupecover:
+                    os.remove(os.path.join(dirpath, afile))
+                    continue
             filelist.append(buildHTML(dirpath, afile, os.path.join(dirpath, afile)))
             if not chapter:
                 chapterlist.append((dirpath.replace('Images', 'Text'), filelist[-1][1]))
                 chapter = True
-            if cover is None:
-                cover = os.path.join(os.path.join(path, 'OEBPS', 'Images'),
-                                     'cover' + getImageFileName(filelist[-1][1])[1])
-                options.covers.append((image.Cover(os.path.join(filelist[-1][0], filelist[-1][1]), cover, options,
-                                                   tomenumber), options.uuid))
     # Overwrite chapternames if tree is flat and ComicInfo.xml has bookmarks
     if not chapternames and options.chapters:
         chapterlist = []
@@ -642,6 +646,9 @@ def getWorkFolder(afile):
             try:
                 cbx = comicarchive.ComicArchive(afile)
                 path = cbx.extract(workdir)
+                tdir = os.listdir(workdir)
+                if 'ComicInfo.xml' in tdir:
+                    tdir.remove('ComicInfo.xml')        
             except OSError as e:
                 rmtree(workdir, True)
                 raise UserWarning(e)
@@ -687,7 +694,6 @@ def getOutputFilename(srcpath, wantedname, ext, tomenumber):
 
 def getComicInfo(path, originalpath):
     xmlPath = os.path.join(path, 'ComicInfo.xml')
-    options.authors = ['KCC']
     options.chapters = []
     options.summary = ''
     titleSuffix = ''
@@ -699,13 +705,18 @@ def getComicInfo(path, originalpath):
             options.title = os.path.splitext(os.path.basename(originalpath))[0]
     else:
         defaultTitle = False
+    if options.author == 'defaultauthor':
+        defaultAuthor = True
+        options.authors = ['KCC']
+    else:
+        defaultAuthor = False
+        options.authors = [options.author]
     if os.path.exists(xmlPath):
         try:
             xml = metadata.MetadataParser(xmlPath)
         except Exception:
             os.remove(xmlPath)
             return
-        options.authors = []
         if xml.data['Title']:
             options.title = hescape(xml.data['Title'])
         elif defaultTitle:
@@ -716,14 +727,16 @@ def getComicInfo(path, originalpath):
             if xml.data['Number']:
                 titleSuffix += ' #' + xml.data['Number'].zfill(3)
             options.title += titleSuffix
-        for field in ['Writers', 'Pencillers', 'Inkers', 'Colorists']:
-            for person in xml.data[field]:
-                options.authors.append(hescape(person))
-        if len(options.authors) > 0:
-            options.authors = list(set(options.authors))
-            options.authors.sort()
-        else:
-            options.authors = ['KCC']
+        if defaultAuthor:    
+            options.authors = []
+            for field in ['Writers', 'Pencillers', 'Inkers', 'Colorists']:
+                for person in xml.data[field]:
+                    options.authors.append(hescape(person))
+            if len(options.authors) > 0:
+                options.authors = list(set(options.authors))
+                options.authors.sort()
+            else:
+                options.authors = ['KCC']
         if xml.data['Bookmarks'] and options.batchsplit == 0:
             options.chapters = xml.data['Bookmarks']
         if xml.data['Summary']:
@@ -892,7 +905,7 @@ def detectCorruption(tmppath, orgpath):
             GUI.addMessage.emit('Source files are probably created by KCC. The second conversion will decrease quality.'
                                 , 'warning', False)
             GUI.addMessage.emit('', '', False)
-    if imageSmaller > imageNumber * 0.25 and not options.upscale and not options.stretch:
+    if imageSmaller > imageNumber * 0.25 and not options.upscale and not options.stretch and options.profile != 'KS':
         print("WARNING: More than 25% of images are smaller than target device resolution. "
               "Consider enabling stretching or upscaling to improve readability.")
         if GUI:
@@ -944,7 +957,7 @@ def makeParser():
 
     main_options.add_argument("-p", "--profile", action="store", dest="profile", default="KV",
                               help="Device profile (Available options: K1, K2, K34, K578, KDX, KPW, KPW5, KV, KO, "
-                                   "K11, KS, KoMT, KoG, KoGHD, KoA, KoAHD, KoAH2O, KoAO, KoN, KoC, KoL, KoF, KoS, KoE)"
+                                   "K11, KS, KoMT, KoG, KoGHD, KoA, KoAHD, KoAH2O, KoAO, KoN, KoC, KoCC, KoL, KoLC, KoF, KoS, KoE)"
                                    " [Default=KV]")
     main_options.add_argument("-m", "--manga-style", action="store_true", dest="righttoleft", default=False,
                               help="Manga style (right-to-left reading and splitting)")
@@ -962,12 +975,16 @@ def makeParser():
                                 help="Output generated file to specified directory or file")
     output_options.add_argument("-t", "--title", action="store", dest="title", default="defaulttitle",
                                 help="Comic title [Default=filename or directory name]")
+    output_options.add_argument("-a", "--author", action="store", dest="author", default="defaultauthor",
+                                help="Author name [Default=KCC]")
     output_options.add_argument("-f", "--format", action="store", dest="format", default="Auto",
                                 help="Output format (Available options: Auto, MOBI, EPUB, CBZ, KFX, MOBI+EPUB) "
                                      "[Default=Auto]")
     output_options.add_argument("-b", "--batchsplit", type=int, dest="batchsplit", default="0",
                                 help="Split output into multiple files. 0: Don't split 1: Automatic mode "
                                      "2: Consider every subdirectory as separate volume [Default=0]")
+    output_options.add_argument("--dedupecover", action="store_true", dest="dedupecover", default=False,
+                                help="De-duplicate the cover as the first page in the book")
 
     processing_options.add_argument("-n", "--noprocessing", action="store_true", dest="noprocessing", default=False,
                                     help="Do not modify image and ignore any profil or processing option")
@@ -1031,13 +1048,13 @@ def checkOptions(options):
         if options.profile in ['K1', 'K2', 'K34', 'K578', 'KPW', 'KPW5', 'KV', 'KO', 'K11', 'KS']:
             options.format = 'MOBI'
         elif options.profile in ['OTHER', 'KoMT', 'KoG', 'KoGHD', 'KoA', 'KoAHD', 'KoAH2O', 'KoAO',
-                                 'KoN', 'KoC', 'KoL', 'KoF', 'KoS', 'KoE']:
+                                 'KoN', 'KoC', 'KoCC', 'KoL', 'KoLC', 'KoF', 'KoS', 'KoE']:
             options.format = 'EPUB'
         elif options.profile in ['KDX']:
             options.format = 'CBZ'
     if options.profile in ['K1', 'K2', 'K34', 'K578', 'KPW', 'KPW5', 'KV', 'KO', 'K11', 'KS']:
         options.iskindle = True
-    elif options.profile in ['OTHER', 'KoMT', 'KoG', 'KoGHD', 'KoA', 'KoAHD', 'KoAH2O', 'KoAO', 'KoN', 'KoC', 'KoL', 'KoF', 'KoS', 'KoE']:
+    elif options.profile in ['OTHER', 'KoMT', 'KoG', 'KoGHD', 'KoA', 'KoAHD', 'KoAH2O', 'KoAO', 'KoN', 'KoC', 'KoCC', 'KoL', 'KoLC', 'KoF', 'KoS', 'KoE']:
         options.isKobo = True
     # Other Kobo devices probably support synthetic spreads as well, but
     # they haven't been tested.
@@ -1088,10 +1105,6 @@ def checkOptions(options):
         image.ProfileData.Profiles["Custom"] = newProfile
         options.profile = "Custom"
     options.profileData = image.ProfileData.Profiles[options.profile]
-    # kindle scribe conversion to mobi is limited in resolution by kindlegen, same with send to kindle and epub
-    if options.profile == 'KS' and (options.format == 'MOBI' or options.format == 'EPUB'):
-        options.profileData = list(options.profileData)
-        options.profileData[1] = (1440, 1920)
     return options
 
 

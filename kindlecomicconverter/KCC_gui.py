@@ -254,6 +254,8 @@ class WorkerThread(QtCore.QThread):
             options.noprocessing = True
         if GUI.deleteBox.isChecked():
             options.delete = True
+        if GUI.dedupeCoverBox.isChecked():
+            options.dedupecover = True
         if GUI.mozJpegBox.checkState() == Qt.CheckState.PartiallyChecked:
             options.forcepng = True
         elif GUI.mozJpegBox.checkState() == Qt.CheckState.Checked:
@@ -462,7 +464,7 @@ class KCCGUI(KCC_ui.Ui_mainWindow):
         if self.needClean:
             self.needClean = False
             GUI.jobList.clear()
-        if self.sevenzip:
+        if self.tar or self.sevenzip:
             fnames = QtWidgets.QFileDialog.getOpenFileNames(MW, 'Select file', self.lastPath,
                                                             'Comic (*.cbz *.cbr *.cb7 *.zip *.rar *.7z *.pdf);;All (*.*)')
         else:
@@ -492,6 +494,8 @@ class KCCGUI(KCC_ui.Ui_mainWindow):
             else:
                 fname = ['']
                 self.showDialog("Editor is disabled due to a lack of 7z.", 'error')
+                self.addMessage('<a href="https://github.com/ciromattia/kcc#7-zip">Install 7z (link)</a>'
+                ' to enable metadata editing.', 'warning')
             if fname[0] != '':
                 if sys.platform.startswith('win'):
                     sname = fname[0].replace('/', '\\')
@@ -638,6 +642,7 @@ class KCCGUI(KCC_ui.Ui_mainWindow):
             self.modeChange(2)
         else:
             self.modeChange(1)
+        GUI.colorBox.setChecked(profile['ForceColor'])
         self.changeFormat()
         GUI.gammaSlider.setValue(0)
         self.changeGamma(0)
@@ -752,7 +757,7 @@ class KCCGUI(KCC_ui.Ui_mainWindow):
 
     def display_kindlegen_missing(self):
         self.addMessage(
-            '<a href="https://github.com/ciromattia/kcc#kindlegen"><b>Install KindleGen (link)</b></a> to enable MOBI conversion for Kindles!', 
+            '<a href="https://github.com/ciromattia/kcc#kindlegen"><b>Install KindleGen (link)</b></a> to enable MOBI conversion for Kindles!',
             'error'
         )
 
@@ -787,6 +792,7 @@ class KCCGUI(KCC_ui.Ui_mainWindow):
                                            'widthBox': GUI.widthBox.value(),
                                            'heightBox': GUI.heightBox.value(),
                                            'deleteBox': GUI.deleteBox.checkState().value,
+                                           'dedupeCoverBox': GUI.dedupeCoverBox.checkState().value,
                                            'maximizeStrips': GUI.maximizeStrips.checkState().value,
                                            'gammaSlider': float(self.gammaValue) * 100})
         self.settings.sync()
@@ -802,7 +808,7 @@ class KCCGUI(KCC_ui.Ui_mainWindow):
                 self.needClean = False
                 GUI.jobList.clear()
             formats = ['.pdf']
-            if self.sevenzip:
+            if self.tar or self.sevenzip:
                 formats.extend(['.cb7', '.7z', '.cbz', '.zip', '.cbr', '.rar'])
             if os.path.isdir(message):
                 GUI.jobList.addItem(message)
@@ -914,67 +920,71 @@ class KCCGUI(KCC_ui.Ui_mainWindow):
 
         self.profiles = {
             "Kindle Oasis 9/10": {'PVOptions': True, 'ForceExpert': False, 'DefaultFormat': 0,
-                                 'DefaultUpscale': True, 'Label': 'KO'},
+                                 'DefaultUpscale': True, 'ForceColor': False, 'Label': 'KO'},
             "Kindle Oasis 8": {'PVOptions': True, 'ForceExpert': False, 'DefaultFormat': 0,
-                             'DefaultUpscale': True, 'Label': 'KV'},
+                             'DefaultUpscale': True, 'ForceColor': False, 'Label': 'KV'},
             "Kindle Voyage": {'PVOptions': True, 'ForceExpert': False, 'DefaultFormat': 0,
-                              'DefaultUpscale': True, 'Label': 'KV'},
+                              'DefaultUpscale': True, 'ForceColor': False, 'Label': 'KV'},
             "Kindle Scribe": {
-                'PVOptions': True, 'ForceExpert': False, 'DefaultFormat': 0, 'DefaultUpscale': False, 'Label': 'KS',
+                'PVOptions': True, 'ForceExpert': False, 'DefaultFormat': 0, 'DefaultUpscale': False, 'ForceColor': False, 'Label': 'KS',
             },
             "Kindle 11": {
-                'PVOptions': True, 'ForceExpert': False, 'DefaultFormat': 0, 'DefaultUpscale': True, 'Label': 'K11',
+                'PVOptions': True, 'ForceExpert': False, 'DefaultFormat': 0, 'DefaultUpscale': True, 'ForceColor': False, 'Label': 'K11',
             },
             "Kindle PW 11": {
-                'PVOptions': True, 'ForceExpert': False, 'DefaultFormat': 0, 'DefaultUpscale': True, 'Label': 'KPW5',
+                'PVOptions': True, 'ForceExpert': False, 'DefaultFormat': 0, 'DefaultUpscale': True, 'ForceColor': False, 'Label': 'KPW5',
             },
             "Kindle PW 7/10": {'PVOptions': True, 'ForceExpert': False, 'DefaultFormat': 0,
-                              'DefaultUpscale': True, 'Label': 'KV'},
+                              'DefaultUpscale': True, 'ForceColor': False, 'Label': 'KV'},
             "Kindle PW 5/6": {'PVOptions': True, 'ForceExpert': False, 'DefaultFormat': 0,
-                              'DefaultUpscale': False, 'Label': 'KPW'},
+                              'DefaultUpscale': False, 'ForceColor': False, 'Label': 'KPW'},
             "Kindle 4/5/7/8/10": {'PVOptions': True, 'ForceExpert': False, 'DefaultFormat': 0,
-                       'DefaultUpscale': False, 'Label': 'K578'},
+                       'DefaultUpscale': False, 'ForceColor': False, 'Label': 'K578'},
             "Kindle DX": {'PVOptions': False, 'ForceExpert': False, 'DefaultFormat': 2,
-                              'DefaultUpscale': False, 'Label': 'KDX'},
+                              'DefaultUpscale': False, 'ForceColor': False, 'Label': 'KDX'},
             "Kobo Mini/Touch": {'PVOptions': False, 'ForceExpert': False, 'DefaultFormat': 1,
-                                'DefaultUpscale': False, 'Label': 'KoMT'},
+                                'DefaultUpscale': False, 'ForceColor': False, 'Label': 'KoMT'},
             "Kobo Glo": {'PVOptions': False, 'ForceExpert': False, 'DefaultFormat': 1,
-                         'DefaultUpscale': False, 'Label': 'KoG'},
+                         'DefaultUpscale': False, 'ForceColor': False, 'Label': 'KoG'},
             "Kobo Glo HD": {'PVOptions': False, 'ForceExpert': False, 'DefaultFormat': 1,
-                            'DefaultUpscale': False, 'Label': 'KoGHD'},
+                            'DefaultUpscale': False, 'ForceColor': False, 'Label': 'KoGHD'},
             "Kobo Aura": {'PVOptions': False, 'ForceExpert': False, 'DefaultFormat': 1,
-                          'DefaultUpscale': False, 'Label': 'KoA'},
+                          'DefaultUpscale': False, 'ForceColor': False, 'Label': 'KoA'},
             "Kobo Aura HD": {'PVOptions': False, 'ForceExpert': False, 'DefaultFormat': 1,
-                             'DefaultUpscale': True, 'Label': 'KoAHD'},
+                             'DefaultUpscale': True, 'ForceColor': False, 'Label': 'KoAHD'},
             "Kobo Aura H2O": {'PVOptions': False, 'ForceExpert': False, 'DefaultFormat': 1,
-                              'DefaultUpscale': True, 'Label': 'KoAH2O'},
+                              'DefaultUpscale': True, 'ForceColor': False, 'Label': 'KoAH2O'},
             "Kobo Aura ONE": {'PVOptions': False, 'ForceExpert': False, 'DefaultFormat': 1,
-                              'DefaultUpscale': True, 'Label': 'KoAO'},
+                              'DefaultUpscale': True, 'ForceColor': False, 'Label': 'KoAO'},
             "Kobo Clara HD": {'PVOptions': False, 'ForceExpert': False, 'DefaultFormat': 1,
-                              'DefaultUpscale': True, 'Label': 'KoC'},
+                              'DefaultUpscale': True, 'ForceColor': False, 'Label': 'KoC'},
             "Kobo Libra H2O": {'PVOptions': False, 'ForceExpert': False, 'DefaultFormat': 1,
-                               'DefaultUpscale': True, 'Label': 'KoL'},
+                               'DefaultUpscale': True, 'ForceColor': False, 'Label': 'KoL'},
             "Kobo Forma": {'PVOptions': False, 'ForceExpert': False, 'DefaultFormat': 1,
-                           'DefaultUpscale': True, 'Label': 'KoF'},
+                           'DefaultUpscale': True, 'ForceColor': False, 'Label': 'KoF'},
             "Kindle 1": {'PVOptions': False, 'ForceExpert': False, 'DefaultFormat': 0,
-                         'DefaultUpscale': False, 'Label': 'K1'},
+                         'DefaultUpscale': False, 'ForceColor': False, 'Label': 'K1'},
             "Kindle 2": {'PVOptions': False, 'ForceExpert': False, 'DefaultFormat': 0,
-                         'DefaultUpscale': False, 'Label': 'K2'},
+                         'DefaultUpscale': False, 'ForceColor': False, 'Label': 'K2'},
             "Kindle Keyboard": {'PVOptions': False, 'ForceExpert': False, 'DefaultFormat': 0,
-                                'DefaultUpscale': False, 'Label': 'K34'},
+                                'DefaultUpscale': False, 'ForceColor': False, 'Label': 'K34'},
             "Kindle Touch": {'PVOptions': False, 'ForceExpert': False, 'DefaultFormat': 0,
-                             'DefaultUpscale': False, 'Label': 'K34'},
-            "Kobo Nia": {'PVOptions': False, 'ForceExpert': False, 'DefaultFormat': 1, 'DefaultUpscale': True,
+                             'DefaultUpscale': False, 'ForceColor': False, 'Label': 'K34'},
+            "Kobo Nia": {'PVOptions': False, 'ForceExpert': False, 'DefaultFormat': 1, 'DefaultUpscale': True, 'ForceColor': False,
                          'Label': 'KoN'},
-            "Kobo Clara 2E": {'PVOptions': False, 'ForceExpert': False, 'DefaultFormat': 1, 'DefaultUpscale': True,
+            "Kobo Clara 2E": {'PVOptions': False, 'ForceExpert': False, 'DefaultFormat': 1, 'DefaultUpscale': True, 'ForceColor': False,
                               'Label': 'KoC'},
-            "Kobo Libra 2": {'PVOptions': False, 'ForceExpert': False, 'DefaultFormat': 1, 'DefaultUpscale': True,
+            "Kobo Clara Colour": {'PVOptions': False, 'ForceExpert': False, 'DefaultFormat': 1, 'DefaultUpscale': True, 'ForceColor': True,
+                              'Label': 'KoCC'},
+            "Kobo Libra 2": {'PVOptions': False, 'ForceExpert': False, 'DefaultFormat': 1, 'DefaultUpscale': True, 'ForceColor': False,
                              'Label': 'KoL'},
-            "Kobo Sage": {'PVOptions': False, 'ForceExpert': False, 'DefaultFormat': 1, 'DefaultUpscale': True,
+            "Kobo Libra Colour": {'PVOptions': False, 'ForceExpert': False, 'DefaultFormat': 1, 'DefaultUpscale': True, 'ForceColor': True,
+                             'Label': 'KoLC'},
+            "Kobo Sage": {'PVOptions': False, 'ForceExpert': False, 'DefaultFormat': 1, 'DefaultUpscale': True, 'ForceColor': False,
                           'Label': 'KoS'},
-            "Kobo Elipsa": {'PVOptions': False, 'ForceExpert': False, 'DefaultFormat': 1, 'DefaultUpscale': True,
+            "Kobo Elipsa": {'PVOptions': False, 'ForceExpert': False, 'DefaultFormat': 1, 'DefaultUpscale': True, 'ForceColor': False,
                             'Label': 'KoE'},
-            "Other": {'PVOptions': False, 'ForceExpert': True, 'DefaultFormat': 1, 'DefaultUpscale': False,
+            "Other": {'PVOptions': False, 'ForceExpert': True, 'DefaultFormat': 1, 'DefaultUpscale': False, 'ForceColor': False,
                       'Label': 'OTHER'},
         }
         profilesGUI = [
@@ -984,8 +994,10 @@ class KCCGUI(KCC_ui.Ui_mainWindow):
             "Kindle Oasis 9/10",
             "Separator",
             "Kobo Clara 2E",
+            "Kobo Clara Colour",
             "Kobo Sage",
             "Kobo Libra 2",
+            "Kobo Libra Colour",
             "Kobo Elipsa",
             "Kobo Nia",
             "Separator",
@@ -1029,12 +1041,18 @@ class KCCGUI(KCC_ui.Ui_mainWindow):
                             '<a href="https://github.com/ciromattia/kcc/wiki/Important-tips">important tips</a>.',
                             'info')
         try:
+            subprocess_run_silent(['tar'], stdout=PIPE, stderr=STDOUT)
+            self.tar = True
+        except FileNotFoundError:
+            self.tar = False
+        try:
             subprocess_run_silent(['7z'], stdout=PIPE, stderr=STDOUT)
             self.sevenzip = True
         except FileNotFoundError:
             self.sevenzip = False
-            self.addMessage('<a href="https://github.com/ciromattia/kcc#7-zip">Install 7z (link)</a>'
-                            ' to enable CBZ/CBR/ZIP/etc processing.', 'warning')
+            if not self.tar:
+                self.addMessage('<a href="https://github.com/ciromattia/kcc#7-zip">Install 7z (link)</a>'
+                                ' to enable CBZ/CBR/ZIP/etc processing.', 'warning')
         self.detectKindleGen(True)
 
         APP.messageFromOtherInstance.connect(self.handleMessage)
