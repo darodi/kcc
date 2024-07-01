@@ -27,7 +27,7 @@ ENV LC_ALL=C.UTF-8 \
     LANGUAGE=en_US:en
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
-
+ENV PATH="/opt/venv/bin:$PATH"
 RUN set -x && \
     TEMP_PACKAGES=() && \
     KEPT_PACKAGES=() && \
@@ -83,7 +83,7 @@ ENV LC_ALL=C.UTF-8 \
     LANGUAGE=en_US:en
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
-
+ENV PATH="/opt/venv/bin:$PATH"
 RUN set -x && \
     TEMP_PACKAGES=() && \
     KEPT_PACKAGES=() && \
