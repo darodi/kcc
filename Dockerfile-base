@@ -67,7 +67,7 @@ RUN set -x && \
     python -m pip install --upgrade pip && \
 #    python -m pip install -r /opt/kcc/requirements.txt && \
     python -m venv /opt/venv && \
-    python -m pip install --upgrade pillow python-slugify psutil raven mozjpeg_lossless_optimization packaging python-slugify Pillow natsort
+    python -m pip install --upgrade pillow python-slugify psutil raven mozjpeg_lossless_optimization packaging python-slugify Pillow natsort distro
 
 
 ######################################################################################
@@ -124,7 +124,7 @@ RUN set -x && \
     python -m pip install --upgrade pip && \
 #    python -m pip install -r /opt/kcc/requirements.txt && \
     python -m venv /opt/venv && \
-    python -m pip install --upgrade pillow python-slugify psutil raven mozjpeg_lossless_optimization packaging python-slugify Pillow natsort
+    python -m pip install --upgrade pillow python-slugify psutil raven mozjpeg_lossless_optimization packaging python-slugify Pillow natsort distro
 
 ######################################################################################
 FROM --platform=linux/amd64 python:3.12-slim as build-amd64
